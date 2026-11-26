@@ -34,6 +34,20 @@ SPA с курсами доллара, евро и тенге на Cloudflare Wor
 
 Деплой — только по просьбе пользователя.
 
+## CI/CD: Cloudflare Workers Builds
+
+GitHub Actions пользователю не нужен. Репозиторий подключается в панели Cloudflare (Worker `my-worker` → Settings → Builds); подключает сам пользователь. На 27.11.2026 подключение ещё не подтверждено.
+
+| Настройка | Значение |
+| --- | --- |
+| Git branch | `main` |
+| Root directory | `my-worker` |
+| Build command | `npm run check && npm run test && npm run build` |
+| Deploy command | `npx cf deploy --prebuilt --mode production` |
+| Preview command | `npx cf previews deploy` |
+
+После подключения каждый push в `main` деплоит сайт, поэтому пушить в `main` — только по просьбе пользователя. Версия npm зафиксирована в `packageManager`.
+
 npm при установке предупреждал, что postinstall-скрипты `workerd` и `esbuild` не входят в `allowScripts`; они не разрешались.
 
 Репозиторий на GitHub: `t1man00/less9`. В сообщения коммитов не добавлять строку `Co-Authored-By` про Claude.

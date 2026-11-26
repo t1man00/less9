@@ -36,7 +36,7 @@ SPA с курсами доллара, евро и тенге на Cloudflare Wor
 
 ## CI/CD: Cloudflare Workers Builds
 
-GitHub Actions пользователю не нужен. Репозиторий подключается в панели Cloudflare (Worker `my-worker` → Settings → Builds); подключает сам пользователь. На 27.11.2026 подключение ещё не подтверждено.
+GitHub Actions пользователю не нужен. Репозиторий подключается в панели Cloudflare (Worker `my-worker` → Settings → Builds); подключает сам пользователь. Подключён 27.11.2026.
 
 | Настройка | Значение |
 | --- | --- |

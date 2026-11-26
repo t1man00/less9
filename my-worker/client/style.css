@@ -1,0 +1,196 @@
+:root {
+	color-scheme: light dark;
+	font-family: system-ui, sans-serif;
+	line-height: 1.5;
+
+	--bg: light-dark(#f4f6fb, #0f1220);
+	--surface: light-dark(#ffffff, #191d30);
+	--text: light-dark(#171a2b, #eef0fa);
+	--muted: light-dark(#5b6078, #a4a9c4);
+	--border: light-dark(#e2e5f0, #2b3049);
+	--accent: light-dark(#4f46e5, #8b85ff);
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	max-width: 56rem;
+	min-height: 100vh;
+	margin: 0 auto;
+	padding: 1.5rem 1rem;
+	display: flex;
+	flex-direction: column;
+	background: var(--bg);
+	color: var(--text);
+}
+
+html {
+	background: var(--bg);
+}
+
+header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.brand {
+	color: inherit;
+	font-size: 1.25rem;
+	font-weight: 700;
+	text-decoration: none;
+}
+
+nav {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem;
+	padding: 0.25rem;
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	background: var(--surface);
+}
+
+nav a {
+	padding: 0.4rem 0.9rem;
+	border-radius: 999px;
+	color: var(--muted);
+	text-decoration: none;
+}
+
+nav a:hover {
+	color: var(--text);
+}
+
+nav a[aria-current="page"] {
+	background: var(--accent);
+	color: light-dark(#ffffff, #0f1220);
+	font-weight: 600;
+}
+
+main {
+	flex: 1;
+	padding-top: 1.5rem;
+}
+
+h1 {
+	font-size: clamp(1.75rem, 5vw, 2.5rem);
+}
+
+.grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+	gap: 1rem;
+}
+
+.card,
+.panel {
+	border: 1px solid var(--border);
+	border-radius: 1rem;
+	background: var(--surface);
+	padding: 1.25rem;
+	box-shadow: 0 0.5rem 1.5rem rgb(15 18 32 / 8%);
+}
+
+.card {
+	border-top: 0.3rem solid var(--card-color);
+}
+
+.card-usd {
+	--card-color: #22a06b;
+}
+
+.card-eur {
+	--card-color: #4f7df3;
+}
+
+.card-kzt {
+	--card-color: #00afca;
+}
+
+.card h2 {
+	margin: 0.25rem 0 0.75rem;
+	font-size: 1.05rem;
+}
+
+.card p {
+	margin: 0.25rem 0;
+}
+
+.badge {
+	display: grid;
+	place-items: center;
+	width: 3rem;
+	height: 3rem;
+	border-radius: 50%;
+	background: var(--card-color);
+	color: #ffffff;
+	font-size: 1.5rem;
+	font-weight: 700;
+}
+
+.base,
+.status,
+footer {
+	color: var(--muted);
+}
+
+.value {
+	font-size: 1.6rem;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	overflow-wrap: anywhere;
+}
+
+.panel {
+	max-width: 30rem;
+}
+
+label {
+	display: grid;
+	gap: 0.3rem;
+	margin-bottom: 1rem;
+	color: var(--muted);
+}
+
+input,
+select {
+	width: 100%;
+	padding: 0.65rem 0.8rem;
+	border: 1px solid var(--border);
+	border-radius: 0.6rem;
+	background: var(--bg);
+	color: var(--text);
+	font: inherit;
+}
+
+.results {
+	display: block;
+}
+
+.results p {
+	margin: 0.25rem 0;
+}
+
+button {
+	padding: 0.6rem 1.2rem;
+	border: 0;
+	border-radius: 0.6rem;
+	background: var(--accent);
+	color: light-dark(#ffffff, #0f1220);
+	font: inherit;
+	cursor: pointer;
+}
+
+footer {
+	padding-top: 2rem;
+	font-size: 0.85rem;
+}
+
+footer a {
+	color: inherit;
+}

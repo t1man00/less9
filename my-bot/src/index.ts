@@ -34,6 +34,7 @@ async function handleWebhook(
 ): Promise<Response> {
 	const received = request.headers.get("X-Telegram-Bot-Api-Secret-Token") ?? "";
 	if (!sameSecret(received, await webhookSecret(token))) {
+		console.warn({ event: "webhook_forbidden" });
 		return new Response("Forbidden", { status: 403 });
 	}
 
@@ -50,12 +51,26 @@ async function handleWebhook(
 		questions: (chatId) => ctx.exports.QuestionBox.getByName(String(chatId)),
 	};
 
+	// В логи пишем только тип события и время: без текста сообщений и номеров чатов
+	const kind = update.callback_query ? "button" : update.message ? "message" : "other";
+	const startedAt = Date.now();
+
 	// ВАЖНО: отвечаем Telegram сразу, а сообщение обрабатываем «в фоне».
 	// Иначе вопрос /ask ждал бы клик, пока Telegram ждёт ответ на предыдущий запрос.
 	ctx.waitUntil(
-		handleUpdate(bot, update).catch((err: unknown) => {
-			console.error("Ошибка обработки:", err instanceof Error ? err.message : err);
-		}),
+		handleUpdate(bot, update).then(
+			() => {
+				console.log({ event: "update_handled", kind, durationMs: Date.now() - startedAt });
+			},
+			(err: unknown) => {
+				console.error({
+					event: "update_failed",
+					kind,
+					durationMs: Date.now() - startedAt,
+					error: err instanceof Error ? err.message : String(err),
+				});
+			},
+		),
 	);
 	return new Response("OK");
 }
@@ -87,7 +102,7 @@ async function setupWebhook(request: Request, token: string): Promise<Response> 
 		});
 	} catch (error) {
 		const message = error instanceof Error ? error.message : "unknown error";
-		console.error("Не удалось подключить webhook:", message);
+		console.error({ event: "setup_failed", error: message });
 		return Response.json({ ok: false, error: message }, { status: 502 });
 	}
 }

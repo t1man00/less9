@@ -41,6 +41,14 @@ SPA с погодой в Алматы и курсами валют на Cloudfla
 - Адрес: https://my-bot.t1man-0015.workers.dev
 - 27.11.2026 webhook подключён к @TTT_les9Bot, пользователь подтвердил, что бот отвечает. Секрет добавляется в панели с галочкой Secret; обычная переменная с тем же именем мешает создать секрет
 
+## Observability
+
+Настраивается только в `cloudflare.config.ts`: деплой перезаписывает то, что включено в панели.
+
+- `my-worker`: логи (с invocation logs), трейсы и Issues, выборка 100%
+- `my-bot`: логи и Issues. **Трейсы не включать:** они сохраняют `url.full` каждого fetch, а адрес Telegram API содержит токен
+- Свои записи — объекты с полем `event`: `dashboard_failed`, `update_handled`, `update_failed`, `webhook_forbidden`, `setup_failed`. Не писать в логи токен, номера чатов и тексты сообщений
+
 ## История и состояние на 27.11.2026
 
 1. Проект создан в `less7` командой `npx cf@latest init my-worker --package-manager npm`.

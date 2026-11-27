@@ -99,7 +99,11 @@ export default {
 		try {
 			return Response.json(await getDashboard());
 		} catch (error) {
-			console.error("Failed to load the dashboard", error);
+			// Объект вместо строки: в Workers Logs по его полям можно фильтровать.
+			console.error({
+				event: "dashboard_failed",
+				error: error instanceof Error ? error.message : String(error),
+			});
 			return Response.json({ error: "Data is unavailable" }, { status: 502 });
 		}
 	},

@@ -12,5 +12,14 @@ export default defineConfig({
 			// The API always goes to the Worker, even for browser navigations.
 			runWorkerFirst: ["/api/*"],
 		},
+		observability: {
+			enabled: true,
+			// Логи: запись о каждом вызове worker и всё, что пишет console
+			logs: { enabled: true, invocationLogs: true, headSamplingRate: 1 },
+			// Трейсы: сколько занял каждый запрос к погоде и курсам
+			traces: { enabled: true, headSamplingRate: 1 },
+			// Issues: группирует ошибки и ответы 5xx
+			issues: { enabled: true },
+		},
 	},
 });

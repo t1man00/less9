@@ -1,22 +1,31 @@
-export type Currency = "USD" | "EUR" | "KZT";
+import type { Dashboard } from "../src/dashboard-types";
 
-export interface Rates {
-	/** Unix time in seconds of the source's last update. */
-	updatedAt: number;
-	/** Amount of each currency in one US dollar. */
-	rates: Record<Currency, number>;
-}
+export type { Dashboard };
+
+export type Currency = "USD" | "EUR" | "KZT" | "RUB";
 
 export const currencies: Record<Currency, { name: string; symbol: string }> = {
 	USD: { name: "Доллар США", symbol: "$" },
 	EUR: { name: "Евро", symbol: "€" },
 	KZT: { name: "Казахстанский тенге", symbol: "₸" },
+	RUB: { name: "Российский рубль", symbol: "₽" },
 };
 
 export const codes = Object.keys(currencies) as Currency[];
 
-export function convert(amount: number, from: Currency, to: Currency, data: Rates): number {
-	return (amount / data.rates[from]) * data.rates[to];
+/** How many tenge one unit of the currency costs. */
+function inTenge(currency: Currency, data: Dashboard): number {
+	const prices: Record<Currency, number> = {
+		USD: data.usdToKzt,
+		EUR: data.eurToKzt,
+		KZT: 1,
+		RUB: data.rubToKzt,
+	};
+	return prices[currency];
+}
+
+export function convert(amount: number, from: Currency, to: Currency, data: Dashboard): number {
+	return (amount * inTenge(from, data)) / inTenge(to, data);
 }
 
 export function formatMoney(value: number, currency: Currency): string {
@@ -27,19 +36,25 @@ export function formatMoney(value: number, currency: Currency): string {
 	return `${number} ${currencies[currency].symbol}`;
 }
 
-let cached: Promise<Rates> | undefined;
+// The weather changes during a visit, so the data is only reused for a few minutes.
+const MAX_AGE_MS = 5 * 60 * 1000;
 
-async function requestRates(): Promise<Rates> {
-	const response = await fetch("/api/rates");
+let cached: { request: Promise<Dashboard>; at: number } | undefined;
+
+async function requestDashboard(): Promise<Dashboard> {
+	const response = await fetch("/api/dashboard");
 	if (!response.ok) throw new Error(`HTTP ${response.status}`);
-	return (await response.json()) as Rates;
+	return (await response.json()) as Dashboard;
 }
 
-/** Loads the rates once per page visit. A failed request can be retried. */
-export function loadRates(): Promise<Rates> {
-	cached ??= requestRates().catch((error: unknown) => {
-		cached = undefined;
-		throw error;
-	});
-	return cached;
+/** Loads the weather and the rates in one request. A failed request can be retried. */
+export function loadDashboard(): Promise<Dashboard> {
+	if (!cached || Date.now() - cached.at > MAX_AGE_MS) {
+		const request = requestDashboard().catch((error: unknown) => {
+			cached = undefined;
+			throw error;
+		});
+		cached = { request, at: Date.now() };
+	}
+	return cached.request;
 }

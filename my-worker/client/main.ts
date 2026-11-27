@@ -3,9 +3,9 @@ import {
 	convert,
 	currencies,
 	formatMoney,
-	loadRates,
+	loadDashboard,
 	type Currency,
-	type Rates,
+	type Dashboard,
 } from "./rates";
 
 interface Page {
@@ -25,35 +25,55 @@ function element<K extends keyof HTMLElementTagNameMap>(
 }
 
 /** Shows a loading state, then the content, or an error with a retry button. */
-function withRates(root: HTMLElement, show: (box: HTMLElement, data: Rates) => void): void {
+function withData(root: HTMLElement, show: (box: HTMLElement, data: Dashboard) => void): void {
 	const box = element("section");
 	root.append(box);
 
 	const load = async () => {
-		box.replaceChildren(element("p", "Загружаем курсы…", "status"));
+		box.replaceChildren(element("p", "Загружаем данные…", "status"));
 		try {
-			const data = await loadRates();
+			const data = await loadDashboard();
 			box.replaceChildren();
 			show(box, data);
 		} catch {
 			const retry = element("button", "Повторить");
 			retry.addEventListener("click", load);
-			box.replaceChildren(element("p", "Не удалось загрузить курсы.", "status"), retry);
+			box.replaceChildren(element("p", "Не удалось загрузить данные.", "status"), retry);
 		}
 	};
 
 	void load();
 }
 
-function updatedNote(data: Rates): HTMLElement {
-	const date = new Date(data.updatedAt * 1000).toLocaleString("ru-RU", {
+function formatTime(unixSeconds: number): string {
+	return new Date(unixSeconds * 1000).toLocaleString("ru-RU", {
 		dateStyle: "long",
 		timeStyle: "short",
 	});
-	return element("p", `Обновлено: ${date}`, "status");
 }
 
-function rateCard(code: Currency, amount: number, quotes: Currency[], data: Rates): HTMLElement {
+function ratesNote(data: Dashboard): HTMLElement {
+	return element("p", `Курсы обновлены: ${formatTime(data.ratesUpdatedAt)}`, "status");
+}
+
+function weatherCard(data: Dashboard): HTMLElement {
+	const format = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 });
+	const card = element("article", "", "card card-weather");
+	card.append(
+		element("h2", `Погода сейчас: ${data.city}`),
+		element("p", `${format.format(data.temperature)} °C`, "temperature"),
+		element("p", `Ветер ${format.format(data.wind)} км/ч`, "base"),
+		element("p", `Измерено: ${formatTime(data.weatherTime)}`, "status"),
+	);
+	return card;
+}
+
+function rateCard(
+	code: Currency,
+	amount: number,
+	quotes: Currency[],
+	data: Dashboard,
+): HTMLElement {
 	const { name, symbol } = currencies[code];
 	const card = element("article", "", `card card-${code.toLowerCase()}`);
 	card.append(
@@ -67,20 +87,21 @@ function rateCard(code: Currency, amount: number, quotes: Currency[], data: Rate
 	return card;
 }
 
-function renderRates(root: HTMLElement): void {
-	withRates(root, (box, data) => {
+function renderHome(root: HTMLElement): void {
+	withData(root, (box, data) => {
 		const grid = element("div", "", "grid");
 		grid.append(
 			rateCard("USD", 1, ["KZT", "EUR"], data),
 			rateCard("EUR", 1, ["KZT", "USD"], data),
-			rateCard("KZT", 1000, ["USD", "EUR"], data),
+			rateCard("RUB", 100, ["KZT", "USD"], data),
+			rateCard("KZT", 1000, ["USD", "RUB"], data),
 		);
-		box.append(grid, updatedNote(data));
+		box.append(weatherCard(data), grid, ratesNote(data));
 	});
 }
 
 function renderConverter(root: HTMLElement): void {
-	withRates(root, (box, data) => {
+	withData(root, (box, data) => {
 		const form = element("form", "", "panel");
 
 		const amount = element("input");
@@ -119,15 +140,15 @@ function renderConverter(root: HTMLElement): void {
 		form.addEventListener("input", update);
 		form.addEventListener("submit", (event) => event.preventDefault());
 		form.append(amountLabel, fromLabel, results);
-		box.append(form, updatedNote(data));
+		box.append(form, ratesNote(data));
 		update();
 	});
 }
 
 const pages: Record<string, Page> = {
 	"/": {
-		title: "Курсы валют",
-		render: renderRates,
+		title: "Погода и курсы",
+		render: renderHome,
 	},
 	"/converter": {
 		title: "Конвертер",
@@ -138,10 +159,13 @@ const pages: Record<string, Page> = {
 		render(root) {
 			const panel = element("div", "", "panel");
 			panel.append(
-				element("p", "Курсы доллара, евро и тенге на Cloudflare Workers."),
 				element(
 					"p",
-					"Источник обновляет данные раз в день. Это справочные курсы: в банках и обменниках они отличаются.",
+					"Погода в Алматы и курсы валют. Worker запрашивает их одновременно через Promise.all.",
+				),
+				element(
+					"p",
+					"Курсы обновляются раз в день. Это справочные курсы: в банках и обменниках они отличаются.",
 				),
 			);
 			root.append(panel);

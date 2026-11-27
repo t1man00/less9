@@ -83,7 +83,7 @@ h1 {
 
 .grid {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+	grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
 	gap: 1rem;
 }
 
@@ -110,6 +110,21 @@ h1 {
 
 .card-kzt {
 	--card-color: #00afca;
+}
+
+.card-rub {
+	--card-color: #d9534f;
+}
+
+.card-weather {
+	--card-color: #f2a93b;
+	margin-bottom: 1rem;
+}
+
+.card .temperature {
+	font-size: 3rem;
+	font-weight: 700;
+	line-height: 1.2;
 }
 
 .card h2 {

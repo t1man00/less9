@@ -1,6 +1,6 @@
 # less9: проект my-worker
 
-SPA с курсами доллара, евро и тенге на Cloudflare Workers: чистый TypeScript, CLI `cf` 1.0.0-rc.6, Vite+.
+SPA с погодой в Алматы и курсами валют на Cloudflare Workers: чистый TypeScript, CLI `cf` 1.0.0-rc.6, Vite+.
 
 ## Команды (из папки `my-worker`)
 
@@ -13,17 +13,21 @@ SPA с курсами доллара, евро и тенге на Cloudflare Wor
 
 ## Структура
 
-- `src/index.ts` — worker: `/api/rates` (кэш на час, 502 при сбое источника), остальные `/api/*` отвечают 404
-- `index.html`, `client/` — фронтенд: роутер на History API, разделы `/` (курсы), `/converter`, `/about`
-- `client/rates.ts` — типы, загрузка курсов, пересчёт и форматирование
+- `src/index.ts` — worker: `/api/dashboard` берёт погоду и курсы одновременно через `Promise.all` (как в ДЗ `lesson8-usd-weather`); если упал любой запрос — 502. Остальные `/api/*` отвечают 404
+- `src/dashboard-types.ts` — тип ответа `/api/dashboard`, общий для worker и фронтенда
+- `index.html`, `client/` — фронтенд: роутер на History API, разделы `/` (погода и курсы), `/converter`, `/about`
+- `client/rates.ts` — загрузка данных, пересчёт и форматирование
 - `client/tsconfig.json` — отдельные настройки с типами DOM для браузерного кода
 - `cloudflare.config.ts` — `notFoundHandling: "single-page-application"`, `runWorkerFirst: ["/api/*"]`
 - `test/index.test.ts` — тесты API с заглушкой источника; `Response` в заглушке создаётся через `mockImplementation`
 - `.claude/launch.json` (в `less9`) — предпросмотр из приложения Claude
 
-## Источник курсов
+## Источники
 
-`https://open.er-api.com/v6/latest/USD`: без ключа, обновляется раз в день. Условия требуют ссылку «Rates By Exchange Rate API» (она в подвале сайта).
+- Курсы: `https://open.er-api.com/v6/latest/USD`, без ключа, обновляется раз в день, кэш на час. Нужна ссылка «Rates By Exchange Rate API».
+- Погода: `https://api.open-meteo.com/v1/forecast` (текущая, Алматы), без ключа, кэш на 10 минут. Нужна ссылка на Open-Meteo.
+
+Обе ссылки стоят в подвале сайта.
 
 ## История и состояние на 27.11.2026
 

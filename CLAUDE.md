@@ -37,7 +37,7 @@ SPA с погодой в Алматы и курсами валют на Cloudfla
 - `src/bot.ts`, `src/dashboard.ts`, `src/telegram.ts` — ответы бота, данные, Telegram API
 - `src/question-box.ts` — Durable Object для вопроса `/ask`, по одному на чат
 - Секрет `TELEGRAM_BOT_TOKEN` пользователь добавляет в панели Cloudflare. В код, git и переписку токен не попадает. Пароль webhook вычисляется из токена
-- Деплой: `npx cf deploy` из `my-bot`. К Workers Builds этот worker не подключён
+- Деплой: автоматически через Workers Builds после push в `main`, если менялись файлы в `my-bot/` (Root directory `my-bot`, preview-сборки выключены, команды сборки и деплоя как у `my-worker`). Поэтому пушить в `main` — только по просьбе пользователя
 - Адрес: https://my-bot.t1man-0015.workers.dev
 - 27.11.2026 webhook подключён к @TTT_les9Bot, пользователь подтвердил, что бот отвечает. Секрет добавляется в панели с галочкой Secret; обычная переменная с тем же именем мешает создать секрет
 
